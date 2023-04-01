@@ -19,7 +19,7 @@ class ProgressEmbed(AbstractEmbed):
             self.steps[step] = False
 
     def get_description(self):
-        desc = 'A new droptimizer report has been submitted! Please wait until the report has been processed. This is indicated by all green checkmarks below.\n\n You can view the Windbridge droptimizer sheet [here](https://docs.google.com/spreadsheets/d/1w8e-5SKjpV0VyVbVI-YGOtb0iIu1sDsnrEcGy0nxoT0/edit#gid=42873824) and the Clear Comms droptimizer sheet [here](https://docs.google.com/spreadsheets/d/1LFUr61R9AewV3RDbIsz3Ibiivqm6IrISPl7QrZcF6XQ/edit#gid=1346039081).\n\n'
+        desc = 'A new droptimizer report has been submitted! Please wait until the report has been processed. This is indicated by all green checkmarks below.\n\n You can view the AotC Andy droptimizer sheet [here](https://docs.google.com/spreadsheets/d/1LFUr61R9AewV3RDbIsz3Ibiivqm6IrISPl7QrZcF6XQ/edit#gid=1346039081).\n\n'
         for step, status in self.steps.items():
             desc += '{0} {1}\n\n'.format(UNICODE_CHECKMARK if status else UNICODE_CROSSMARK, step)
         return desc
@@ -39,8 +39,7 @@ class ProgressEmbed(AbstractEmbed):
         # TODO: As we have more progress ones, we need to make this a parent class, then a droptimizer progress child embed.
         embed = discord.Embed(title=self.title, description=self.get_description(), color=self.color)
         time, date = GeneralUtility.get_time_and_date()
-        embed.set_author(name=f"Generated at {time} on {date}",
-                         icon_url="https://raw.githubusercontent.com/mist-guild/mist-rustbolt/master/public/logo192.png")
+        embed.set_author(name=f"Generated at {time} on {date}")
         embed.set_thumbnail(url="https://pbs.twimg.com/profile_images/943219769850785792/pohESfYc_400x400.jpg")
         return embed
 

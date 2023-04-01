@@ -7,6 +7,7 @@ from blizzardapi import BlizzardApi
 
 
 class Blizzard:
+
     api_client = BlizzardApi(os.getenv('BLIZZ_CLIENT'), os.getenv('BLIZZ_SECRET'))
     boss_list = dict()
     item_list = dict()
