@@ -1,3 +1,4 @@
+import logging
 import os
 
 from discord.ext import commands
@@ -17,6 +18,7 @@ class ExceptionLoggingCog(commands.Cog, name="Exception Logging"):
             time, date = GeneralUtility.get_time_and_date()
             message = f"Error occurred at {time} on {date}!\n\n```{error}```\n"
             await log_channel.send(message)
+            logging.error(message)
 
 
 async def setup(bot: commands.Bot):

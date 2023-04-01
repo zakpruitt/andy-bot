@@ -21,18 +21,21 @@ class DroptimizerParser:
             else:
                 report_data[item_name] = sim.sim_difference
 
-        # return player ([1][0]) and report data
         return report_data
 
     @staticmethod
-    def parse_reports(report_list, player_list):
-        parsed_reports = {}
-        if len(report_list) > 0:
-            for i in range(len(report_list)):
-                report_link = report_list[i]
-                report_data = RaidbotsUtility.get_report_csv(report_link)
-                if report_data is None:
-                    raise Exception("Report link is invalid! Report link violated: " + report_link + ".")
-                data = DroptimizerParser.parse_report(report_data)
-                parsed_reports[player_list[i]] = data
-        return parsed_reports
+    def parse_reports(raider_links):
+        parsed_reports = {difficulty: {} for difficulty in ["Mythic", "Heroic", "Normal"]}
+
+        for raider, links in raider_links.items():
+            for difficulty in ["Mythic", "Heroic", "Normal"]:
+                link = links.get(difficulty)
+                if link is not None:
+                    report_data = RaidbotsUtility.get_report_csv(link)
+                    if report_data is None:
+                        raise Exception("Report link is invalid! Report link violated: " + link + ".")
+                    parsed_reports[difficulty][raider] = DroptimizerParser.parse_report(report_data)
+
+        return parsed_reports["Mythic"], parsed_reports["Heroic"], parsed_reports["Normal"]
+
+

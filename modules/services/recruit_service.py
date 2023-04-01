@@ -1,8 +1,3 @@
-import asyncio
-import base64
-import os
-import zlib
-
 import discord
 
 from modules.utilities.discord_utility import DiscordUtility
@@ -21,7 +16,7 @@ class RecruitService:
     @classmethod
     async def generate_trial_channel(cls, ctx):
         # get required variables
-        category = DiscordUtility.get_category_by_id(ctx.guild, 1078952236459249675)
+        category = DiscordUtility.get_category_by_id(ctx.guild, 1089899690717360218)
         tech_support_role = DiscordUtility.get_role_by_id(ctx.guild, 1089766156505727047)
         officer_role = DiscordUtility.get_role_by_id(ctx.guild, 1078793314188398592)
 
@@ -31,7 +26,8 @@ class RecruitService:
         discord_name = recruit_embed.fields[4].value
         recruit_member = DiscordUtility.get_member_by_discord_name(ctx.guild, discord_name)
         if not recruit_member:
-            await ctx.send(f"Could not find a member with the name {discord_name}. Please invite them before invoking this command.")
+            await ctx.send(
+                f"Could not find a member with the name {discord_name}. Please invite them before invoking this command.")
             return
 
         # Create a new channel under the category
@@ -55,12 +51,12 @@ class RecruitService:
                                f"needs/questions, <@124689347818684419> for any strategy/composition related "
                                f"needs/questions, <@620849124912398337> for healing related needs/questions, "
                                f"and <@64833312220250112> for anything else! <a:pepeJAM:1081251169906724864>\n\nWe "
-                               f"provide six versatility phials, cauldron pots, feasts, repairs (during raid), "
+                               f"provide six versatility phials, pot cauldrons, feasts, repairs (during raid), "
                                f"and vantus runes. It is expected you bring any other ancillary consumables ("
                                f"inscription runes, etc.) and are FULLY enchanted (this includes tertiaries). "
                                f"Required addons outside of the typical ones are MRT (Method Raid Tools) and RC Loot "
                                f"Council. As a reminder, we raid M, T, TH 10 PM - 1 AM CST. It is expected raiders "
-                               f"are present at least by 9:55 PM. <a:Kissahomie:1081251209412874324>\n\nTrials can "
+                               f"are present at least by 9:50 PM. <a:LETSGOOO:1081251215796604979>\n\nTrials can "
                                f"participate in boosts starting from day 1, so feel free to sign up in "
                                f"<#1079194103193026640>! Other than that, please keep an eye on "
                                f"<#1079191097743519835> for roster postings and have fun!! "

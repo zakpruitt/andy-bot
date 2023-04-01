@@ -1,4 +1,6 @@
+import concurrent
 import logging
+import asyncio
 import os
 from collections import defaultdict
 
@@ -8,7 +10,6 @@ from apis.blizzard import Blizzard
 from modules.embeds.droptimizer_search_embed import DroptimizerSearchEmbed
 from modules.embeds.progress_embed import ProgressEmbed
 from modules.parsers.droptimizer_parser import DroptimizerParser
-from modules.utilities.general_utility import GeneralUtility
 from modules.utilities.google_sheets_utility import GoogleSheetsUtility
 
 
@@ -17,41 +18,64 @@ class DroptimizerService:
 
     @classmethod
     async def process_droptimizer_reports(cls, progress_embed, progress_msg):
-        summary_col_idx = [1, 6]
-        player_list = [x for x in cls.sheet.Links.col_values(1)[1:] if x]
+        # get raider links
+        raider_links = cls._gather_raider_links()
+        progress_embed.advance_step()
+        await progress_msg.edit(embed=progress_embed.get_embed())
 
-        for i in range(2, 4):
-            # get data
-            difficulty = cls.sheet.Links.col_values(i)[0]
-            droptimizer_reports_list = [x for x in cls.sheet.Links.col_values(i)[1:] if x]
-            progress_embed.advance_step()
-            await progress_msg.edit(embed=progress_embed.get_embed())
+        # parse reports
+        mythic_reports, heroic_reports, normal_reports = await cls._parse_reports(raider_links)
+        progress_embed.advance_step()
+        await progress_msg.edit(embed=progress_embed.get_embed())
 
-            # parse links
-            data = DroptimizerParser.parse_reports(droptimizer_reports_list, player_list)
-            progress_embed.advance_step()
-            await progress_msg.edit(embed=progress_embed.get_embed())
-            logging.info('Droptimizer reports for {0} parsed.'.format(difficulty))
-
-            # write data to spreadsheet
-            cls.sheet.write_data_to_worksheet(difficulty,
-                                              pd.DataFrame(data=data),
-                                              include_index=True,
-                                              include_column_header=True)
-
-            # add boss summaries
-            cls.sheet.get_worksheet(difficulty).update('A1', 'Boss')
-            summary = DroptimizerService.get_boss_summary(data)
-            cls.sheet.write_data_to_worksheet('Summary',
-                                              pd.DataFrame(data=summary).transpose().sort_index(),
-                                              row=3,
-                                              col=summary_col_idx[i - 2],
-                                              include_index=i == 2,
-                                              resize=False)
-            progress_embed.advance_step()
-            await progress_msg.edit(embed=progress_embed.get_embed())
-            logging.info('Droptimizer reports for {0} written to spreadsheet.'.format(difficulty))
+        # write reports to spreadsheet
+        await cls._write_reports_to_spreadsheet(mythic_reports, heroic_reports, normal_reports)
+        progress_embed.advance_step()
+        await progress_msg.edit(embed=progress_embed.get_embed())
         logging.info('Droptimizer reports completed!')
+
+    @classmethod
+    def _gather_raider_links(cls):
+        raiders = cls.sheet.Links.col_values(1)[1:]
+        mythic_links = cls.sheet.Links.col_values(2)[1:]
+        heroic_links = cls.sheet.Links.col_values(3)[1:]
+        normal_links = cls.sheet.Links.col_values(4)[1:]
+        raider_links = {}
+
+        for raider, mythic, heroic, normal in zip(raiders, mythic_links, heroic_links, normal_links):
+            raider_links[raider] = {
+                'Mythic': mythic or None,
+                'Heroic': heroic or None,
+                'Normal': normal or None,
+            }
+
+        logging.info('Droptimizer data gathered.')
+        return raider_links
+
+    @classmethod
+    async def _parse_reports(cls, raider_links):
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            loop = asyncio.get_event_loop()
+            mythic_reports, heroic_reports, normal_reports = await loop.run_in_executor(executor,
+                                                                                        DroptimizerParser.parse_reports,
+                                                                                        raider_links)
+
+        logging.info('Droptimizer reports parsed.')
+        return mythic_reports, heroic_reports, normal_reports
+
+    @classmethod
+    async def _write_reports_to_spreadsheet(cls, mythic_reports, heroic_reports, normal_reports):
+        data_frames = [pd.DataFrame(data=mythic_reports), pd.DataFrame(data=heroic_reports),
+                       pd.DataFrame(data=normal_reports)]
+        df = pd.concat(data_frames, keys=['Mythic', 'Heroic', 'Normal'])
+        cls.sheet.write_data_to_worksheet('Data', df, include_index=True, include_column_header=True)
+        logging.info('Droptimizer reports written to spreadsheet.')
+
+
+
+
+
+
 
     @staticmethod
     def get_boss_summary(data: dict):
@@ -95,7 +119,7 @@ class DroptimizerService:
             result_df = result_df.dropna(how='all')
             result_df = result_df.sort_values(by="Max Value", ascending=False)
 
-            embed = cls.__get_item_search_embed(result_df, search_type)
+            embed = cls._get_item_search_embed(result_df, search_type)
             return embed
         except Exception as e:
             logging.error(e)
@@ -104,13 +128,16 @@ class DroptimizerService:
     @staticmethod
     def get_progress_embed():
         return ProgressEmbed(
-            title=f'{os.getenv("TEAM_NAME")} Droptimizer Report Processor',
-            steps_list=["Retrieve Mythic Data", "Parse Mythic Data", "Write Mythic Data",
-                        "Retrieve Heroic Data", "Parse Heroic Data", "Write Heroic Data"]
+            title=f'AotC Andy Droptimizer Report Processor',
+            description='A new droptimizer report has been submitted! Please wait until the report has been processe' +
+                        'd. This is indicated by all green checkmarks below.\n\n You can view the AotC Andy droptimi' +
+                        'zer sheet [here](https://docs.google.com/spreadsheets/d/1LFUr61R9AewV3RDbIsz3Ibiivqm6IrISPl' +
+                        '7QrZcF6XQ/edit#gid=1346039081).\n\n',
+            steps_list=["Retrieve Droptimizer Reports", "Parse Droptimizer Reports", "Write Data"]
         )
 
     @staticmethod
-    def __get_item_search_embed(result_df, search_type):
+    def _get_item_search_embed(result_df, search_type):
         if search_type == 'item':
             icon_name = result_df['Item'][0].split('-')[1].strip()
             icon_url = Blizzard.get_icon_from_item_name(icon_name)
@@ -119,8 +146,18 @@ class DroptimizerService:
             icon_url = Blizzard.get_icon_from_boss_name(icon_name)
 
         return DroptimizerSearchEmbed(
-            title=f'{os.getenv("TEAM_NAME")} Droptimizer Search - {icon_name}',
+            title=f'AotC Andy Droptimizer Search - {icon_name}',
             icon_url=icon_url,
             dataframe=result_df,
             search_type=search_type
         )
+
+# # add boss summaries
+        # cls.sheet.get_worksheet(difficulty).update('A1', 'Boss')
+        # summary = DroptimizerService.get_boss_summary(data)
+        # cls.sheet.write_data_to_worksheet('Summary',
+        #                                   pd.DataFrame(data=summary).transpose().sort_index(),
+        #                                   row=3,
+        #                                   col=summary_col_idx[i - 2],
+        #                                   include_index=i == 2,
+        #                                   resize=False)
