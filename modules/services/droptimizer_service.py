@@ -1,6 +1,6 @@
+import asyncio
 import concurrent
 import logging
-import asyncio
 import os
 from collections import defaultdict
 
@@ -14,7 +14,6 @@ from modules.utilities.google_sheets_utility import GoogleSheetsUtility
 
 
 class DroptimizerService:
-
     sheet = GoogleSheetsUtility(os.getenv('DROPTIMIZER_SPREADSHEET_NAME'))
 
     @classmethod
@@ -86,7 +85,7 @@ class DroptimizerService:
         logging.info('Droptimizer reports written to spreadsheet.')
 
     @staticmethod
-    def get_boss_summary(data: dict):
+    def _get_boss_summary(data: dict):
         """ Grabs relevant statistics for each boss. """
         summary_data = defaultdict(lambda: {'player_count': 0, 'total': 0, 'max': 0, 'upgrade_count': 0})
 
@@ -150,13 +149,3 @@ class DroptimizerService:
             dataframe=result_df,
             search_type=search_type
         )
-
-    # # add boss summaries
-    # cls.sheet.get_worksheet(difficulty).update('A1', 'Boss')
-    # summary = DroptimizerService.get_boss_summary(data)
-    # cls.sheet.write_data_to_worksheet('Summary',
-    #                                   pd.DataFrame(data=summary).transpose().sort_index(),
-    #                                   row=3,
-    #                                   col=summary_col_idx[i - 2],
-    #                                   include_index=i == 2,
-    #                                   resize=False)
