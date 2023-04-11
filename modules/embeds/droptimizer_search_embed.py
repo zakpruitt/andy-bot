@@ -41,7 +41,7 @@ class DroptimizerSearchEmbed(AbstractEmbed):
         embed = discord.Embed(title=self.title, description=f"```{self.get_description()}```", color=self.color)
         time, date = GeneralUtility.get_time_and_date()
         embed.set_author(name=f"Generated at {time} on {date}",
-                         icon_url="https://raw.githubusercontent.com/zakpruitt/andy-bot/master/resources/images/andy_logo_simple.png")
+                         icon_url="https://raw.githubusercontent.com/mist-guild/mist-rustbolt/master/public/logo192.png")
         embed.set_thumbnail(url=self.icon_url)
         return embed
 
@@ -49,7 +49,7 @@ class DroptimizerSearchEmbed(AbstractEmbed):
         embed = discord.Embed(title=self.title, description=self.get_mobile_friendly_description(), color=self.color)
         time, date = GeneralUtility.get_time_and_date()
         embed.set_author(name=f"Generated at {time} on {date}",
-                         icon_url="https://raw.githubusercontent.com/zakpruitt/andy-bot/master/resources/images/andy_logo_simple.png")
+                         icon_url="https://raw.githubusercontent.com/mist-guild/mist-rustbolt/master/public/logo192.png")
         embed.set_thumbnail(url=self.icon_url)
         return embed
 
