@@ -14,16 +14,20 @@ class RecruitService:
             f'Thread {ctx.channel.mention} was closed and locked by {ctx.author.mention} on {date} at {time}.')
 
     @classmethod
-    async def generate_trial_channel(cls, ctx):
+    async def generate_trial_channel(cls, ctx, recruit_name=None, discord_name=None):
         # get required variables
         category = DiscordUtility.get_category_by_id(ctx.guild, 1089899690717360218)
         tech_support_role = DiscordUtility.get_role_by_id(ctx.guild, 1089766156505727047)
         officer_role = DiscordUtility.get_role_by_id(ctx.guild, 1078793314188398592)
+        bot_role = DiscordUtility.get_role_by_id(ctx.guild, 1089668616384938070)
 
         # Get the recruit's Discord name
-        recruit_embed = await cls.__get_recruit_embed(ctx.channel)
-        recruit_name = recruit_embed.fields[0].value
-        discord_name = recruit_embed.fields[4].value
+        if discord_name is None and recruit_name is None:
+            recruit_embed = await cls.__get_recruit_embed(ctx.channel)
+            recruit_name = recruit_embed.fields[0].value
+            discord_name = recruit_embed.fields[4].value
+        else:
+            discord_name = discord_name
         recruit_member = DiscordUtility.get_member_by_discord_name(ctx.guild, discord_name)
         if not recruit_member:
             await ctx.send(
@@ -34,8 +38,9 @@ class RecruitService:
         overwrites = {
             ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
             tech_support_role: discord.PermissionOverwrite(read_messages=True, send_messages=True),
+            bot_role: discord.PermissionOverwrite(read_messages=True, send_messages=True),
             officer_role: discord.PermissionOverwrite(read_messages=True, send_messages=True),
-            recruit_member: discord.PermissionOverwrite(read_messages=True, send_messages=True)
+            recruit_member: discord.PermissionOverwrite(read_messages=True, send_messages=True),
         }
         channel_name = f"trial-{recruit_name}"
         new_channel = await ctx.guild.create_text_channel(channel_name, category=category, overwrites=overwrites)
@@ -62,7 +67,6 @@ class RecruitService:
                                f"<#1079191097743519835> for roster postings and have fun!! "
                                f"<:GAmer:1081034983558348800> <a:HYPERCLAP:1081251217147187252>")
         await ctx.send(f"Created a new channel {new_channel.mention} under the category {category.name}.")
-        await cls.close_application(ctx)
 
     @staticmethod
     async def __get_recruit_embed(channel):

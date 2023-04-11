@@ -14,6 +14,7 @@ from modules.utilities.google_sheets_utility import GoogleSheetsUtility
 
 
 class DroptimizerService:
+
     sheet = GoogleSheetsUtility(os.getenv('DROPTIMIZER_SPREADSHEET_NAME'))
 
     @classmethod
@@ -132,7 +133,7 @@ class DroptimizerService:
             description='A new droptimizer report has been submitted! Please wait until the report has been processe' +
                         'd. This is indicated by all green checkmarks below.\n\n You can view the AotC Andy droptimi' +
                         'zer sheet [here](https://docs.google.com/spreadsheets/d/1LFUr61R9AewV3RDbIsz3Ibiivqm6IrISPl' +
-                        '7QrZcF6XQ/edit#gid=1346039081).\n\n',
+                        '7QrZcF6XQ/edit#gid=1346039081).',
             steps_list=["Retrieve Droptimizer Reports", "Parse Droptimizer Reports", "Write Data"]
         )
 

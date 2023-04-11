@@ -7,7 +7,6 @@ class DroptimizerParser:
 
     @staticmethod
     def parse_report(report):
-        """ Parses the data in a raidbots data.csv to find the % increase for each sim reported. """
         base_dps = float(report[1][1])
         report_data = dict()
 
@@ -37,5 +36,3 @@ class DroptimizerParser:
                     parsed_reports[difficulty][raider] = DroptimizerParser.parse_report(report_data)
 
         return parsed_reports["Mythic"], parsed_reports["Heroic"], parsed_reports["Normal"]
-
-

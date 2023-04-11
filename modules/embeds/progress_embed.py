@@ -20,10 +20,7 @@ class ProgressEmbed(AbstractEmbed):
             self.steps[step] = False
 
     def get_description(self):
-        desc = 'A new droptimizer report has been submitted! Please wait until the report has been processed. This is ' \
-               'indicated by all green checkmarks below.\n\n You can view the AotC Andy droptimizer sheet [here](' \
-               'https://docs.google.com/spreadsheets/d/1LFUr61R9AewV3RDbIsz3Ibiivqm6IrISPl7QrZcF6XQ/edit#gid' \
-               '=1346039081).\n\n'
+        desc = self.description + "\n\n"
         for step, status in self.steps.items():
             desc += '{0} {1}\n\n'.format(UNICODE_CHECKMARK if status else UNICODE_CROSSMARK, step)
         return desc

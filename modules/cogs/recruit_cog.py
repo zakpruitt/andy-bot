@@ -18,10 +18,10 @@ class RecruitCog(commands.Cog, name="Recruit"):
         await RecruitService.close_application(ctx)
 
     @commands.command("trial")
-    async def trial_applicant(self, ctx: commands.Context):
+    async def trial_applicant(self, ctx: commands.Context, recruit_name=None, discord_name=None):
         if ctx.channel.parent_id != self.RECRUIT_FORUM_ID:
             return
-        await RecruitService.generate_trial_channel(ctx)
+        await RecruitService.generate_trial_channel(ctx, recruit_name, discord_name)
 
 
 async def setup(bot: commands.Bot):
