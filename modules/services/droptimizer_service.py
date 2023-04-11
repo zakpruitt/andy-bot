@@ -76,13 +76,27 @@ class DroptimizerService:
 
     @classmethod
     async def _write_reports_to_spreadsheet(cls, mythic_reports, heroic_reports, normal_reports):
-        data_frames = [pd.DataFrame(data=mythic_reports), pd.DataFrame(data=heroic_reports),
-                       pd.DataFrame(data=normal_reports)]
-        df = pd.concat(data_frames, keys=['Mythic', 'Heroic', 'Normal'])
-        cls.sheet.write_data_to_worksheet('Data', df, include_index=True, include_column_header=True)
-        cls.sheet.Data.update('A1', 'Difficulty')
-        cls.sheet.Data.update('B1', 'Boss - Item')
+        # create dataframe from reports
+        data_frames = (pd.DataFrame(data=d) for d in [mythic_reports, heroic_reports, normal_reports])
+        df = pd.concat(data_frames, keys=['Mythic', 'Heroic', 'Normal']).reset_index(level=1)
+
+        # process dataframe
+        result_df = cls._process_dataframe(df)
+        result_df = result_df.pivot_table(index=['Difficulty', 'Boss', 'Item'], columns='Player', values='Value',
+                                          aggfunc='first').reset_index()
+
+        # write dataframe to spreadsheet
+        cls.sheet.write_data_to_worksheet('Data', result_df, include_index=False, include_column_header=True)
         logging.info('Droptimizer reports written to spreadsheet.')
+
+    @staticmethod
+    def _process_dataframe(df):
+        df_item_values = df.apply(lambda x: x.apply(
+            lambda y: pd.DataFrame(y.items(), columns=['Item', 'Value']) if isinstance(y, dict) else y))
+        result_df = pd.concat(
+            [row[col].assign(Difficulty=idx, Boss=row[0], Player=col) for col in df_item_values.columns
+             for idx, row in df_item_values.iterrows() if isinstance(row[col], pd.DataFrame)], ignore_index=True)
+        return result_df
 
     @staticmethod
     def _get_boss_summary(data: dict):
@@ -110,24 +124,35 @@ class DroptimizerService:
     @classmethod
     def search_droptimizer_data(cls, difficulty, search_type, search_string):
         try:
+            # get dataframe from spreadsheet
             worksheet = cls.sheet.get_data_worksheet()
             dataframe = GoogleSheetsUtility.get_as_df(worksheet)
 
-            # Filter dataframe based on difficulty and search string
+            # filter dataframe based on difficulty and search string
             dataframe = dataframe.loc[dataframe['Difficulty'] == difficulty]
-            dataframe = dataframe[dataframe['Boss - Item'].str.contains(search_string, case=False)]
+            if search_type == 'item':
+                dataframe = dataframe[dataframe['Item'].str.contains(search_string, case=False)]
+            else:
+                dataframe = dataframe[dataframe['Boss'].str.contains(search_string, case=False)]
 
-            # Set index and drop unneeded columns
-            dataframe.set_index('Boss - Item', inplace=True)
+            # set index and drop unneeded columns
+            dataframe.set_index(['Boss', 'Item'], inplace=True)
             dataframe.drop('Difficulty', axis=1, inplace=True)
 
-            # Get max values for item and build new df
+            # get max values for item and build new df
             max_values, max_items = dataframe.max(axis=0), dataframe.idxmax(axis=0)
             max_values = max_values.sort_values(ascending=False)
-            result_df = pd.DataFrame({'Max Value': max_values, 'Item': max_items})
+
+            # combine max values, items, and boss names
+            result_df = pd.DataFrame({
+                'Max Value': max_values,
+                'Item': [boss_item_tuple[1] for boss_item_tuple in max_items],
+                'Boss': [boss_item_tuple[0] for boss_item_tuple in max_items]
+            })
             result_df.dropna(how='all', inplace=True)
             result_df.sort_values(by="Max Value", ascending=False, inplace=True)
 
+            # build search embed and return
             embed = cls._get_item_search_embed(result_df, search_type)
             return embed
         except Exception as e:
@@ -137,10 +162,10 @@ class DroptimizerService:
     @staticmethod
     def _get_item_search_embed(result_df, search_type):
         if search_type == 'item':
-            icon_name = result_df['Item'][0].split('-')[1].strip()
+            icon_name = result_df['Item'][0]
             icon_url = Blizzard.get_icon_from_item_name(icon_name)
         else:
-            icon_name = result_df['Item'][0].split('-')[0].strip()
+            icon_name = result_df['Boss'][0]
             icon_url = Blizzard.get_icon_from_boss_name(icon_name)
 
         return DroptimizerSearchEmbed(
@@ -149,3 +174,22 @@ class DroptimizerService:
             dataframe=result_df,
             search_type=search_type
         )
+
+    @classmethod
+    def try_charts(cls):
+        try:
+            worksheet = cls.sheet.get_data_worksheet()
+            dataframe = GoogleSheetsUtility.get_as_df(worksheet)
+
+            # Filter dataframe based on difficulty and search string
+            dataframe = dataframe.loc[dataframe['Difficulty'] == 'Mythic']
+
+            # Set index and drop unneeded columns
+            dataframe.set_index('Bossxstabbyx', inplace=True)
+            dataframe.drop('Difficulty', axis=1, inplace=True)
+            pd.set_option('display.max_rows', 5)
+            pd.set_option('display.max_columns', 5)
+            print(dataframe)
+        except Exception as e:
+            logging.error(e)
+            return None

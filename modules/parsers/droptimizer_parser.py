@@ -8,17 +8,24 @@ class DroptimizerParser:
     @staticmethod
     def parse_report(report):
         base_dps = float(report[1][1])
-        report_data = dict()
+        report_data = {}
 
         # iterate through each sim and store max increases into data dict
         for raw_sim in report[2:]:
+            # gather data
             sim = Sim(raw_sim[0], base_dps, float(raw_sim[1]))
+            boss_name = Blizzard.get_boss_from_id(sim.boss_id)[0]
+            item_name = Blizzard.get_item_from_id(sim.item_id)[0]
 
-            item_name = f"{Blizzard.get_boss_from_id(sim.boss_id)[0]} - {Blizzard.get_item_from_id(sim.item_id)[0]}"
-            if item_name in report_data:
-                report_data[item_name] = max(sim.sim_difference, report_data[item_name])
+            # check if boss name is in data dict
+            if boss_name not in report_data:
+                report_data[boss_name] = {}
+
+            # add max sim for item to data dict
+            if item_name in report_data[boss_name]:
+                report_data[boss_name][item_name] = max(sim.sim_difference, report_data[boss_name][item_name])
             else:
-                report_data[item_name] = sim.sim_difference
+                report_data[boss_name][item_name] = sim.sim_difference
 
         return report_data
 

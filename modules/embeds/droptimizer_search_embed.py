@@ -19,7 +19,7 @@ class DroptimizerSearchEmbed(AbstractEmbed):
         description = []
         headers = ["Name", "DPS Gain", "Item Name"]
         for index, row in self.dataframe.iterrows():
-            item_name = row["Item"].split(' - ')[1].strip()
+            item_name = row["Item"]
             description.append([index, "{:.1f}".format(row["Max Value"]), item_name[0:15]])
 
         # return ascii table
@@ -33,7 +33,7 @@ class DroptimizerSearchEmbed(AbstractEmbed):
     def get_mobile_friendly_description(self):
         description = []
         for index, row in self.dataframe.iterrows():
-            item_name = row["Item"].split(' - ')[1].strip()
+            item_name = row["Item"]
             description.append(f"> {item_name}\n> {index} - {row['Max Value']:.2f}")
         return '\n\n'.join(description)
 
