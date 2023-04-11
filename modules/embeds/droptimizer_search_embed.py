@@ -20,7 +20,7 @@ class DroptimizerSearchEmbed(AbstractEmbed):
         headers = ["Name", "DPS Gain", "Item Name"]
         for index, row in self.dataframe.iterrows():
             item_name = row["Item"].split(' - ')[1].strip()
-            description.append([index, "{:.1f}".format(row["Max Value"]), item_name[0:20]])
+            description.append([index, "{:.1f}".format(row["Max Value"]), item_name[0:15]])
 
         # return ascii table
         return t2a(

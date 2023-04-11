@@ -13,6 +13,9 @@ class GoogleSheetsUtility:
     def get_worksheet(self, name):
         return self.spreadsheet.worksheet(name)
 
+    def get_data_worksheet(self):
+        return self.spreadsheet.worksheet('Data')
+
     def write_data_to_worksheet(self, worksheet_name, data, row=1, col=1, include_index=False,
                                 include_column_header=False, resize=True):
         try:

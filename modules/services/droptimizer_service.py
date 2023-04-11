@@ -35,6 +35,17 @@ class DroptimizerService:
         await progress_msg.edit(embed=progress_embed.get_embed())
         logging.info('Droptimizer reports completed!')
 
+    @staticmethod
+    def get_progress_embed():
+        return ProgressEmbed(
+            title=f'AotC Andy Droptimizer Report Processor',
+            description='A new droptimizer report has been submitted! Please wait until the report has been processe' +
+                        'd. This is indicated by all green checkmarks below.\n\n You can view the AotC Andy droptimi' +
+                        'zer sheet [here](https://docs.google.com/spreadsheets/d/1LFUr61R9AewV3RDbIsz3Ibiivqm6IrISPl' +
+                        '7QrZcF6XQ/edit#gid=1346039081).',
+            steps_list=["Retrieve Droptimizer Reports", "Parse Droptimizer Reports", "Write Data"]
+        )
+
     @classmethod
     def _gather_raider_links(cls):
         raiders = cls.sheet.Links.col_values(1)[1:]
@@ -70,13 +81,9 @@ class DroptimizerService:
                        pd.DataFrame(data=normal_reports)]
         df = pd.concat(data_frames, keys=['Mythic', 'Heroic', 'Normal'])
         cls.sheet.write_data_to_worksheet('Data', df, include_index=True, include_column_header=True)
+        cls.sheet.Data.update('A1', 'Difficulty')
+        cls.sheet.Data.update('B1', 'Boss - Item')
         logging.info('Droptimizer reports written to spreadsheet.')
-
-
-
-
-
-
 
     @staticmethod
     def get_boss_summary(data: dict):
@@ -104,38 +111,29 @@ class DroptimizerService:
     @classmethod
     def search_droptimizer_data(cls, difficulty, search_type, search_string):
         try:
-            worksheet = cls.sheet.get_worksheet(difficulty)
+            worksheet = cls.sheet.get_data_worksheet()
             dataframe = GoogleSheetsUtility.get_as_df(worksheet)
 
-            dataframe.set_index('Boss', inplace=True)
+            # Filter dataframe based on difficulty and search string
+            dataframe = dataframe.loc[dataframe['Difficulty'] == difficulty]
+            dataframe = dataframe[dataframe['Boss - Item'].str.contains(search_string, case=False)]
 
-            # Filter dataframe based on search string
-            dataframe = dataframe[dataframe.index.str.contains(search_string, case=False)]
-            dataframe = dataframe[dataframe > 0]
+            # Set index and drop unneeded columns
+            dataframe.set_index('Boss - Item', inplace=True)
+            dataframe.drop('Difficulty', axis=1, inplace=True)
 
-            # get max values for item and build new df
+            # Get max values for item and build new df
             max_values, max_items = dataframe.max(axis=0), dataframe.idxmax(axis=0)
             max_values = max_values.sort_values(ascending=False)
             result_df = pd.DataFrame({'Max Value': max_values, 'Item': max_items})
-            result_df = result_df.dropna(how='all')
-            result_df = result_df.sort_values(by="Max Value", ascending=False)
+            result_df.dropna(how='all', inplace=True)
+            result_df.sort_values(by="Max Value", ascending=False, inplace=True)
 
             embed = cls._get_item_search_embed(result_df, search_type)
             return embed
         except Exception as e:
             logging.error(e)
             return None
-
-    @staticmethod
-    def get_progress_embed():
-        return ProgressEmbed(
-            title=f'AotC Andy Droptimizer Report Processor',
-            description='A new droptimizer report has been submitted! Please wait until the report has been processe' +
-                        'd. This is indicated by all green checkmarks below.\n\n You can view the AotC Andy droptimi' +
-                        'zer sheet [here](https://docs.google.com/spreadsheets/d/1LFUr61R9AewV3RDbIsz3Ibiivqm6IrISPl' +
-                        '7QrZcF6XQ/edit#gid=1346039081).',
-            steps_list=["Retrieve Droptimizer Reports", "Parse Droptimizer Reports", "Write Data"]
-        )
 
     @staticmethod
     def _get_item_search_embed(result_df, search_type):
@@ -153,12 +151,12 @@ class DroptimizerService:
             search_type=search_type
         )
 
-# # add boss summaries
-        # cls.sheet.get_worksheet(difficulty).update('A1', 'Boss')
-        # summary = DroptimizerService.get_boss_summary(data)
-        # cls.sheet.write_data_to_worksheet('Summary',
-        #                                   pd.DataFrame(data=summary).transpose().sort_index(),
-        #                                   row=3,
-        #                                   col=summary_col_idx[i - 2],
-        #                                   include_index=i == 2,
-        #                                   resize=False)
+    # # add boss summaries
+    # cls.sheet.get_worksheet(difficulty).update('A1', 'Boss')
+    # summary = DroptimizerService.get_boss_summary(data)
+    # cls.sheet.write_data_to_worksheet('Summary',
+    #                                   pd.DataFrame(data=summary).transpose().sort_index(),
+    #                                   row=3,
+    #                                   col=summary_col_idx[i - 2],
+    #                                   include_index=i == 2,
+    #                                   resize=False)
