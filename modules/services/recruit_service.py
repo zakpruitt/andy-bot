@@ -16,7 +16,8 @@ class RecruitService:
     @classmethod
     async def generate_trial_channel(cls, ctx, recruit_name=None, discord_name=None):
         # get required variables
-        category = DiscordUtility.get_category_by_id(ctx.guild, 1089899690717360218)
+        category = DiscordUtility.get_category_by_id(ctx.guild, 1079193586056302602)
+        recruit_trial_role = DiscordUtility.get_role_by_id(ctx.guild, 1089766156505727047)
         tech_support_role = DiscordUtility.get_role_by_id(ctx.guild, 1089766156505727047)
         officer_role = DiscordUtility.get_role_by_id(ctx.guild, 1078793314188398592)
         bot_role = DiscordUtility.get_role_by_id(ctx.guild, 1089668616384938070)
@@ -26,8 +27,6 @@ class RecruitService:
             recruit_embed = await cls.__get_recruit_embed(ctx.channel)
             recruit_name = recruit_embed.fields[0].value
             discord_name = recruit_embed.fields[4].value
-        else:
-            discord_name = discord_name
         recruit_member = DiscordUtility.get_member_by_discord_name(ctx.guild, discord_name)
         if not recruit_member:
             await ctx.send(
@@ -45,7 +44,7 @@ class RecruitService:
         channel_name = f"trial-{recruit_name}"
         new_channel = await ctx.guild.create_text_channel(channel_name, category=category, overwrites=overwrites)
 
-        # Populate the trial channel
+        # Populate the trial channel and permit roles
         await new_channel.send(f"Hey, {recruit_member.mention}!! 👋 Welcome to your own, personal trial channel. "
                                f"<:BatChest:1082112942541123716>\n\nThis channel is meant to be a private and direct "
                                f"line of communication between yourself and the officers. This may include log "
@@ -66,7 +65,9 @@ class RecruitService:
                                f"<#1092128300563964046>! Other than that, please keep an eye on "
                                f"<#1079191097743519835> for roster postings and have fun!! "
                                f"<:GAmer:1081034983558348800> <a:HYPERCLAP:1081251217147187252>")
+        await recruit_member.add_roles(recruit_trial_role)
         await ctx.send(f"Created a new channel {new_channel.mention} under the category {category.name}.")
+        await ctx.send(f"Given the role {recruit_trial_role.mention} to {recruit_member.mention}.")
 
     @staticmethod
     async def __get_recruit_embed(channel):
