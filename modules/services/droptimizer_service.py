@@ -5,6 +5,7 @@ import os
 from collections import defaultdict
 
 import pandas as pd
+import math
 
 from apis.blizzard import Blizzard
 from modules.embeds.droptimizer_search_embed import DroptimizerSearchEmbed
@@ -134,6 +135,7 @@ class DroptimizerService:
                 dataframe = dataframe[dataframe['Item'].str.contains(search_string, case=False)]
             else:
                 dataframe = dataframe[dataframe['Boss'].str.contains(search_string, case=False)]
+            dataframe.dropna(how='all', axis='columns', inplace=True)
 
             # set index and drop unneeded columns
             dataframe.set_index(['Boss', 'Item'], inplace=True)
@@ -141,15 +143,13 @@ class DroptimizerService:
 
             # get max values for item and build new df
             max_values, max_items = dataframe.max(axis=0), dataframe.idxmax(axis=0)
-            max_values = max_values.sort_values(ascending=False)
 
             # combine max values, items, and boss names
             result_df = pd.DataFrame({
                 'Max Value': max_values,
                 'Item': [boss_item_tuple[1] for boss_item_tuple in max_items],
-                'Boss': [boss_item_tuple[0] for boss_item_tuple in max_items]
+                'Boss': [boss_item_tuple[0] for boss_item_tuple in max_items],
             })
-            result_df.dropna(how='all', inplace=True)
             result_df.sort_values(by="Max Value", ascending=False, inplace=True)
 
             # build search embed and return
@@ -169,7 +169,7 @@ class DroptimizerService:
             icon_url = Blizzard.get_icon_from_boss_name(icon_name)
 
         return DroptimizerSearchEmbed(
-            title=f'AotC Andy Droptimizer Search - {icon_name}',
+            title=f'Droptimizer Search - {icon_name}',
             icon_url=icon_url,
             dataframe=result_df,
             search_type=search_type

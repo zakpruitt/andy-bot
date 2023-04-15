@@ -63,7 +63,7 @@ class RecruitService:
                                f"Council. As a reminder, we raid M, T, TH 10 PM - 1 AM CST. It is expected raiders "
                                f"are present at least by 9:50 PM. <a:LETSGOOO:1081251215796604979>\n\nTrials can "
                                f"participate in boosts starting from day 1, so feel free to sign up in "
-                               f"<#1079194103193026640>! Other than that, please keep an eye on "
+                               f"<#1092128300563964046>! Other than that, please keep an eye on "
                                f"<#1079191097743519835> for roster postings and have fun!! "
                                f"<:GAmer:1081034983558348800> <a:HYPERCLAP:1081251217147187252>")
         await ctx.send(f"Created a new channel {new_channel.mention} under the category {category.name}.")
