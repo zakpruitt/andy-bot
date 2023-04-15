@@ -16,13 +16,13 @@ class Blizzard:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             # update boss list and item list
-            with open('resources/blizz_cache.json', 'r') as f:
+            with open(os.getenv("PATH") + 'resources/blizz_cache.json', 'r') as f:
                 cache = json.loads(f.read())
             args[0].boss_list = cache['boss']
             args[0].item_list = cache['item']
 
             # update tier map
-            with open('resources/tier_map.json', 'r') as f:
+            with open(os.getenv("PATH") + 'resources/tier_map.json', 'r') as f:
                 args[0].tier_map = json.loads(f.read())
             return func(*args, **kwargs)
 
@@ -75,5 +75,5 @@ class Blizzard:
             'boss': boss_list,
             'item': item_list
         }
-        with open('resources/blizz_cache.json', 'w') as f:
+        with open(os.getenv("PATH") + 'resources/blizz_cache.json', 'w') as f:
             f.write(json.dumps(cache))
