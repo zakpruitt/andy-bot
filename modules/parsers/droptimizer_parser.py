@@ -1,4 +1,4 @@
-from apis.blizzard import Blizzard
+from apis.blizzard_api import BlizzApi
 from apis.dataclasses.sim import Sim
 from modules.utilities.raidbots_utility import RaidbotsUtility
 
@@ -14,8 +14,8 @@ class DroptimizerParser:
         for raw_sim in report[2:]:
             # gather data
             sim = Sim(raw_sim[0], base_dps, float(raw_sim[1]))
-            boss_name = Blizzard.get_boss_from_id(sim.boss_id)[0]
-            item_name = Blizzard.get_item_from_id(sim.item_id)[0]
+            boss_name = BlizzApi.get_boss_from_id(sim.boss_id)[0]
+            item_name = BlizzApi.get_item_from_id(sim.item_id)[0]
 
             # check if boss name is in data dict
             if boss_name not in report_data:

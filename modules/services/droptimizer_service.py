@@ -7,7 +7,7 @@ from collections import defaultdict
 import pandas as pd
 import math
 
-from apis.blizzard import Blizzard
+from apis.blizzard_api import BlizzApi
 from modules.embeds.droptimizer_search_embed import DroptimizerSearchEmbed
 from modules.embeds.progress_embed import ProgressEmbed
 from modules.parsers.droptimizer_parser import DroptimizerParser
@@ -163,10 +163,10 @@ class DroptimizerService:
     def _get_item_search_embed(result_df, search_type):
         if search_type == 'item':
             icon_name = result_df['Item'][0]
-            icon_url = Blizzard.get_icon_from_item_name(icon_name)
+            icon_url = BlizzApi.get_icon_from_item_name(icon_name)
         else:
             icon_name = result_df['Boss'][0]
-            icon_url = Blizzard.get_icon_from_boss_name(icon_name)
+            icon_url = BlizzApi.get_icon_from_boss_name(icon_name)
 
         return DroptimizerSearchEmbed(
             title=f'Droptimizer Search - {icon_name}',
