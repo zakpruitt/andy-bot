@@ -6,7 +6,7 @@ import os
 from blizzardapi import BlizzardApi
 
 
-class Blizzard:
+class BlizzApi:
     api_client = BlizzardApi(os.getenv('BLIZZ_CLIENT'), os.getenv('BLIZZ_SECRET'))
     boss_list = dict()
     item_list = dict()
@@ -16,13 +16,13 @@ class Blizzard:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             # update boss list and item list
-            with open(os.getenv("PATH") + 'resources/blizz_cache.json', 'r') as f:
+            with open(os.getenv("BOT_PATH") + 'resources/blizz_cache.json', 'r') as f:
                 cache = json.loads(f.read())
             args[0].boss_list = cache['boss']
             args[0].item_list = cache['item']
 
             # update tier map
-            with open(os.getenv("PATH") + 'resources/tier_map.json', 'r') as f:
+            with open(os.getenv("BOT_PATH") + 'resources/tier_map.json', 'r') as f:
                 args[0].tier_map = json.loads(f.read())
             return func(*args, **kwargs)
 
@@ -35,7 +35,7 @@ class Blizzard:
         if boss_id not in cls.boss_list:
             boss = cls.api_client.wow.game_data.get_journal_encounter('us', 'en_US', boss_id)
             cls.boss_list[boss_id] = boss['name']
-            Blizzard.save_cache(cls.boss_list, cls.item_list)
+            BlizzApi.save_cache(cls.boss_list, cls.item_list)
         return cls.boss_list[boss_id]
 
     @classmethod
@@ -48,7 +48,7 @@ class Blizzard:
             item = cls.api_client.wow.game_data.get_item('us', 'en_US', item_id)
             media = cls.api_client.wow.game_data.get_item_media('us', 'en_US', item_id)
             cls.item_list[item_id] = [item['name'], media['assets'][0]['value']]
-            Blizzard.save_cache(cls.boss_list, cls.item_list)
+            BlizzApi.save_cache(cls.boss_list, cls.item_list)
             logging.info(
                 'Item {0} was retrieved from the Blizzard API and has been added to cache.'.format(item['name']))
         return cls.item_list[item_id]
@@ -75,5 +75,5 @@ class Blizzard:
             'boss': boss_list,
             'item': item_list
         }
-        with open(os.getenv("PATH") + 'resources/blizz_cache.json', 'w') as f:
+        with open(os.getenv("BOT_PATH") + 'resources/blizz_cache.json', 'w') as f:
             f.write(json.dumps(cache))
