@@ -44,6 +44,7 @@ class DroptimizerCog(commands.Cog, name="Droptimizer"):
                                                                   search_string)
         if mobile_friendly.lower() == "mf":
             await ctx.send(embed=search_embed.get_mobile_friendly_embed())
+            return
         await ctx.send(embed=search_embed.get_embed())
 
 
