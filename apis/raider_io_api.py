@@ -10,7 +10,7 @@ class RaiderIoApi:
                            "season-7.2.0"]
 
     @classmethod
-    def get_all_io_history(cls, name, realm, region):
+    def get_profile_all_io_history(cls, name, realm, region):
         # get all seasons response
         mythic_plus_scores_by_season = "mythic_plus_scores_by_season:" + ":".join(cls.MYTHIC_PLUS_SEASONS)
         response = cls.api_client.get_character_profile(region, realm, name, mythic_plus_scores_by_season)

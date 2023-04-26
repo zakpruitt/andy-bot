@@ -16,9 +16,9 @@ class RaiderIoCog(commands.Cog, name="Raider IO"):
     @commands.command('riohistory')
     async def get_io_history(self, ctx: commands.Context, name: str, realm: str, region: str = 'us'):
         """ Displays a player's raider.io history. """
-        await ctx.send("starting")
-        RaiderIoService.get_raider_io_history(name, realm, region)
-        await ctx.send("received")
+        msg = await ctx.send(f"Retrieving {name}'s Raider.IO history...")
+        embed = RaiderIoService.get_raider_io_history(name, realm, region)
+        await msg.edit(content="", embed=embed)
 
 
 async def setup(bot: commands.Bot):
