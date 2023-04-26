@@ -12,7 +12,8 @@ class ExceptionLoggingCog(commands.Cog, name="Exception Logging"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    async def log_exception(self, error):
+    async def log_exception(self, error, traceback):
+        error = str(error) + "\n\n" + traceback.format_exc()
         log_channel = self.bot.get_channel(int(os.environ.get("ERROR_LOG_ID")))
         if log_channel:
             time, date = GeneralUtility.get_time_and_date()

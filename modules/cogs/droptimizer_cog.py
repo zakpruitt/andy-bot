@@ -21,9 +21,8 @@ class DroptimizerCog(commands.Cog, name="Droptimizer"):
             progress_embed = DroptimizerService.get_progress_embed()
             progress_msg = await ctx.send(embed=progress_embed.get_embed())
             await DroptimizerService.process_droptimizer_reports(progress_embed, progress_msg)
-        except Exception as e:
-            error = str(e) + "\n\n" + traceback.format_exc()
-            await self.bot.cogs['Exception Logging'].log_exception(error)
+        except Exception as error:
+            await self.bot.cogs['Exception Logging'].log_exception(error, traceback.format_exc())
             await progress_msg.edit(embed=progress_embed.error())
 
     @commands.command('dropsearch')

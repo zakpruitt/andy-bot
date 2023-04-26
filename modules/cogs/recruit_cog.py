@@ -25,6 +25,11 @@ class RecruitCog(commands.Cog, name="Recruit"):
             return
         await RecruitService.generate_trial_channel(ctx, recruit_name, discord_name)
 
+    @commands.Cog.listener()
+    async def on_thread_create(self, thread):
+
+        await thread.send("hello")
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(RecruitCog(bot))
