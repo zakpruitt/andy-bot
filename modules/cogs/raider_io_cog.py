@@ -22,7 +22,7 @@ class RaiderIoCog(commands.Cog, name="Raider IO"):
             await msg.edit(content="", embed=embed)
         except Exception as error:
             await self.bot.cogs['Exception Logging'].log_exception(error, traceback.format_exc())
-            await msg.edit(content="", embed=embed.error())
+            await msg.edit(embed=embed.error())
 
 
 async def setup(bot: commands.Bot):

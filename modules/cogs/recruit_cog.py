@@ -27,8 +27,15 @@ class RecruitCog(commands.Cog, name="Recruit"):
 
     @commands.Cog.listener()
     async def on_thread_create(self, thread):
+        if thread.parent_id != self.RECRUIT_FORUM_ID:
+            return
 
-        await thread.send("hello")
+        # get context from initial message population
+        async for message in thread.history(limit=1):
+            first_message = message
+        ctx = await self.bot.get_context(first_message)
+        fields = thread.name.split(" - ")
+        await self.bot.cogs['Raider IO'].get_io_history(ctx, fields[0], fields[1])
 
 
 async def setup(bot: commands.Bot):

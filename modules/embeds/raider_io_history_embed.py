@@ -54,10 +54,11 @@ class RaiderIoHistoryEmbed(AbstractEmbed):
         for idx, (season, score) in enumerate(self.mythic_plus_scores_by_season.items()):
             if idx % 3 == 0 and idx != 0:
                 self.add_field_line_break(embed)
-            if idx == len(self.mythic_plus_scores_by_season) - 1 and len(self.mythic_plus_scores_by_season) % 3 != 0:
+            if idx == len(self.mythic_plus_scores_by_season) - 1 \
+                    and len(self.mythic_plus_scores_by_season) % 3 != 0 \
+                    and idx != 0:
                 embed.add_field(name="\u200b", value="\u200b", inline=True)
             embed.add_field(name=self.SEASON_NAME_ICON_MAP[season], value=score, inline=True)
-
 
         # add AA author and timestamp
         time, date = GeneralUtility.get_time_and_date()
