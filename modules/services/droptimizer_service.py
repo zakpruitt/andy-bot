@@ -5,7 +5,6 @@ import os
 from collections import defaultdict
 
 import pandas as pd
-import math
 
 from apis.blizzard_api import BlizzApi
 from modules.embeds.droptimizer_search_embed import DroptimizerSearchEmbed

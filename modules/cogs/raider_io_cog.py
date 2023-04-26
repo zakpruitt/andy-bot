@@ -1,11 +1,8 @@
-import os
 import traceback
 
 from discord.ext import commands
 
-from modules.services.droptimizer_service import DroptimizerService
 from modules.services.raider_io_service import RaiderIoService
-from modules.utilities.google_sheets_utility import GoogleSheetsUtility
 
 
 class RaiderIoCog(commands.Cog, name="Raider IO"):
