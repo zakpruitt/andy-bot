@@ -98,29 +98,6 @@ class DroptimizerService:
              for idx, row in df_item_values.iterrows() if isinstance(row[col], pd.DataFrame)], ignore_index=True)
         return result_df
 
-    @staticmethod
-    def _get_boss_summary(data: dict):
-        """ Grabs relevant statistics for each boss. """
-        summary_data = defaultdict(lambda: {'player_count': 0, 'total': 0, 'max': 0, 'upgrade_count': 0})
-
-        for player in data:
-            upgraded_bosses = set()  # set to keep track of bosses that have been upgraded by the player
-
-            # item = "Boss - Item", upgrade_value = float of dps increase
-            for item, upgrade_value in data[player].items():
-                boss_name = item.split('-')[0].strip()  # extract boss name
-
-                # if the item is a significant upgrade, add it to the summary_data
-                if upgrade_value > 100:
-                    # check if the boss has been an upgrade before by the same player
-                    if boss_name not in upgraded_bosses:
-                        summary_data[boss_name]['player_count'] += 1
-                        upgraded_bosses.add(boss_name)
-                    summary_data[boss_name]['total'] += upgrade_value
-                    summary_data[boss_name]['max'] = max(summary_data[boss_name]['max'], upgrade_value)
-                    summary_data[boss_name]['upgrade_count'] += 1
-        return dict(summary_data)
-
     @classmethod
     def search_droptimizer_data(cls, difficulty, search_type, search_string):
         try:
@@ -173,22 +150,3 @@ class DroptimizerService:
             dataframe=result_df,
             search_type=search_type
         )
-
-    @classmethod
-    def try_charts(cls):
-        try:
-            worksheet = cls.sheet.get_data_worksheet()
-            dataframe = GoogleSheetsUtility.get_as_df(worksheet)
-
-            # Filter dataframe based on difficulty and search string
-            dataframe = dataframe.loc[dataframe['Difficulty'] == 'Mythic']
-
-            # Set index and drop unneeded columns
-            dataframe.set_index('Bossxstabbyx', inplace=True)
-            dataframe.drop('Difficulty', axis=1, inplace=True)
-            pd.set_option('display.max_rows', 5)
-            pd.set_option('display.max_columns', 5)
-            print(dataframe)
-        except Exception as e:
-            logging.error(e)
-            return None

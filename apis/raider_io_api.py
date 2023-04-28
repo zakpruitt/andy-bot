@@ -19,3 +19,19 @@ class RaiderIoApi:
         response['class_name'] = response['class']
         response.pop('class')
         return RaiderIoProfile(**response)
+
+    @classmethod
+    def get_guild_current_raid_progression(cls):
+        # get guild profile and data
+        response = cls.api_client.get_guild_profile("us", "illidan", "AotC Andys", "raid_progression")
+        raid_name = 'aberrus-the-shadowed-crucible'
+        raid_data = response['raid_progression'][raid_name]
+
+        # build and return dict
+        result = {
+            "raid_name": raid_name,
+            "normal_bosses_killed": raid_data['normal_bosses_killed'],
+            "heroic_bosses_killed": raid_data['heroic_bosses_killed'],
+            "mythic_bosses_killed": raid_data['mythic_bosses_killed']
+        }
+        return result
