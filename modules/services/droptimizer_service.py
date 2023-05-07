@@ -2,7 +2,7 @@ import asyncio
 import concurrent
 import logging
 import os
-from collections import defaultdict
+import re
 
 import pandas as pd
 
@@ -11,10 +11,13 @@ from modules.embeds.droptimizer_search_embed import DroptimizerSearchEmbed
 from modules.embeds.progress_embed import ProgressEmbed
 from modules.parsers.droptimizer_parser import DroptimizerParser
 from modules.utilities.google_sheets_utility import GoogleSheetsUtility
+from modules.utilities.raidbots_utility import RaidbotsUtility
 
 
 class DroptimizerService:
     sheet = GoogleSheetsUtility(os.getenv('DROPTIMIZER_SPREADSHEET_NAME'))
+    DROPTIMIZER_REPORTS_URL_PATTERN = r'https://www\.raidbots\.com/simbot/report/[a-zA-Z0-9]+'
+    DROPTIMIZER_DIFFICULTY_PATTERN = r'\b(Mythic|Heroic|Normal)\b$'
 
     @classmethod
     async def process_droptimizer_reports(cls, progress_embed, progress_msg):
@@ -150,3 +153,38 @@ class DroptimizerService:
             dataframe=result_df,
             search_type=search_type
         )
+
+    @classmethod
+    async def add_droptimizer_report(cls, message):
+        # get links
+        links_sheet = cls.sheet.get_worksheet('Links')
+        links = re.findall(cls.DROPTIMIZER_REPORTS_URL_PATTERN, message)
+
+        # add to sheet
+        for link in links:
+            name_spec, difficulty = cls.__get_droptimizer_link_info(link)
+            player = links_sheet.find(name_spec)
+
+            if player is None:
+                row_num = len(links_sheet.col_values(1)) + 1
+                links_sheet.update_cell(row_num, 1, name_spec)
+            else:
+                row_num = player.row
+
+            if difficulty == "Mythic":
+                links_sheet.update_cell(row_num, 2, link)
+            elif difficulty == "Heroic":
+                links_sheet.update_cell(row_num, 3, link)
+            elif difficulty == "Normal":
+                links_sheet.update_cell(row_num, 4, link)
+
+        return len(links)
+
+    @staticmethod
+    def __get_droptimizer_link_info(link):
+        report_data = RaidbotsUtility.get_report_json(link)
+        if report_data['simbot']['simType'] != 'droptimizer':
+            raise Exception(f'Report {link} is not a droptimizer report!')
+        name_spec = f"{report_data['simbot']['player']} - {report_data['simbot']['spec'].capitalize()}"
+        difficulty = report_data['simbot']['publicTitle'].split('•')[-1].strip()
+        return name_spec, difficulty

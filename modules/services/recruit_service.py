@@ -16,16 +16,16 @@ class RecruitService:
     @classmethod
     async def generate_trial_channel(cls, ctx, recruit_name=None, discord_name=None):
         # get required variables
-        category = DiscordUtility.get_category_by_id(ctx.guild, 1079193586056302602)
-        recruit_trial_role = DiscordUtility.get_role_by_id(ctx.guild, 1089766156505727047)
-        tech_support_role = DiscordUtility.get_role_by_id(ctx.guild, 1089766156505727047)
+        category = DiscordUtility.get_category_by_id(ctx.guild, 1089899690717360218)
+        recruit_trial_role = DiscordUtility.get_role_by_id(ctx.guild, 1079193586056302602)
+        recruiter_role = DiscordUtility.get_role_by_id(ctx.guild, 1080222880719175781)
         officer_role = DiscordUtility.get_role_by_id(ctx.guild, 1078793314188398592)
         bot_role = DiscordUtility.get_role_by_id(ctx.guild, 1089668616384938070)
 
         # Get the recruit's Discord name
         if discord_name is None and recruit_name is None:
             recruit_embed = await cls.__get_recruit_embed(ctx.channel)
-            recruit_name = recruit_embed.fields[0].value
+            recruit_name = recruit_embed.fields[0].value.split(" - ")[0]
             discord_name = recruit_embed.fields[4].value
         recruit_member = DiscordUtility.get_member_by_discord_name(ctx.guild, discord_name)
         if not recruit_member:
@@ -36,7 +36,7 @@ class RecruitService:
         # Create a new channel under the category
         overwrites = {
             ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
-            tech_support_role: discord.PermissionOverwrite(read_messages=True, send_messages=True),
+            recruiter_role: discord.PermissionOverwrite(read_messages=True, send_messages=True),
             bot_role: discord.PermissionOverwrite(read_messages=True, send_messages=True),
             officer_role: discord.PermissionOverwrite(read_messages=True, send_messages=True),
             recruit_member: discord.PermissionOverwrite(read_messages=True, send_messages=True),
@@ -51,10 +51,10 @@ class RecruitService:
                                f"reviews, log analysis, conversation about strategies, etc. Expect feedback at least "
                                f"once a week, typically between Thursday - Monday. "
                                f"<:BASED:1079179696765411414>\n\nFeel free to ping ANY officer. We are here to help "
-                               f"you succeed! Specifically, ping <@305491314286526474> for performance related "
-                               f"needs/questions, <@124689347818684419> for any strategy/composition related "
-                               f"needs/questions, <@620849124912398337> for healing related needs/questions, "
-                               f"and <@64833312220250112> for anything else! <a:pepeJAM:1081251169906724864>\n\nWe "
+                               f"you succeed! Specifically, ping <@305491314286526474> for performance or healing "
+                               f"related needs/questions, <@124689347818684419> for any strategy/composition related "
+                               f"needs/questions, and <@64833312220250112> for anything else! <a:pepeJAM:1081251169906724864>"
+                               f"\n\nWe "
                                f"provide six versatility phials, pot cauldrons, feasts, repairs (during raid), "
                                f"and vantus runes. It is expected you bring any other ancillary consumables ("
                                f"inscription runes, etc.) and are FULLY enchanted (this includes tertiaries). "

@@ -13,8 +13,9 @@ class RosterCog(commands.Cog, name="Roster"):
 
     @commands.command("ass")
     async def based(self, ctx: commands.Context):
-        """ Closes, locks, and sends a notifying message in a recruit application. """
+        """ based. """
         RosterService.a()
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(RosterCog(bot))

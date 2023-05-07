@@ -7,7 +7,7 @@ from modules.utilities.general_utility import GeneralUtility
 
 
 class ExceptionLoggingCog(commands.Cog, name="Exception Logging"):
-    """ Tyrhold's custom error logging cog. """
+    """ Andy Bot's custom error logging cog. """
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
