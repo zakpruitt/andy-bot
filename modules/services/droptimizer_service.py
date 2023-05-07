@@ -3,6 +3,7 @@ import concurrent
 import logging
 import os
 import re
+from itertools import zip_longest
 
 import pandas as pd
 
@@ -56,7 +57,7 @@ class DroptimizerService:
         normal_links = cls.sheet.Links.col_values(4)[1:]
         raider_links = {}
 
-        for raider, mythic, heroic, normal in zip(raiders, mythic_links, heroic_links, normal_links):
+        for raider, mythic, heroic, normal in zip_longest(raiders, mythic_links, heroic_links, normal_links):
             raider_links[raider] = {
                 'Mythic': mythic or None,
                 'Heroic': heroic or None,

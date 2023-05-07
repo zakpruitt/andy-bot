@@ -16,7 +16,7 @@ class DroptimizerCog(commands.Cog, name="Droptimizer"):
 
     @commands.command(name="droprun")
     async def run_droptimizer_reports(self, ctx: commands.Context):
-        """ Parses all input Droptimizer Links. """
+        """ Parses all input droptimizer links. """
         try:
             # make this into a specific embed
             progress_embed = DroptimizerService.get_progress_embed()
@@ -49,7 +49,7 @@ class DroptimizerCog(commands.Cog, name="Droptimizer"):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        """ Listens for Droptimizer links and appends them to the spreadsheet. """
+        """ Listens for droptimizer links and appends them to the spreadsheet. """
         if message.channel.id != self.DROPTIMIZER_CHANNEL_ID:
             return
 
@@ -61,7 +61,7 @@ class DroptimizerCog(commands.Cog, name="Droptimizer"):
                 await message.channel.send(f"I successfully processed {links_processed} link(s). Thank you, {mention}! <:tier5:1085390493778710683>")
         except Exception as error:
             await self.bot.cogs['Exception Logging'].log_exception(error, traceback.format_exc())
-            await message.channel.send(f"There was an error processing your droptimizer report(s), {mention}. "
+            await message.reply(f"There was an error processing your droptimizer report(s), {mention}. "
                                        f"<:TrollDespair:1081251201951223819>\n\nPlease verify your link(s) are correct"
                                        f"! If your link(s) are valid and issues persist, please ping an "         
                                        f"officer. <:Okayge:1103488695174189177> 👍")
