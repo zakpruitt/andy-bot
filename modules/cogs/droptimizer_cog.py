@@ -38,14 +38,18 @@ class DroptimizerCog(commands.Cog, name="Droptimizer"):
             await ctx.channel.send('Invalid type. Valid options: Boss, Item')
             return
 
-        # get embed and send it
-        search_embed = DroptimizerService.search_droptimizer_data(difficulty.capitalize(),
-                                                                  search_type.lower(),
-                                                                  search_string)
-        if mobile_friendly.lower() == "mf":
-            await ctx.send(embed=search_embed.get_mobile_friendly_embed())
-            return
-        await ctx.send(embed=search_embed.get_embed())
+        try:
+            # get embed and send it
+            search_embed = DroptimizerService.search_droptimizer_data(difficulty.capitalize(),
+                                                                      search_type.lower(),
+                                                                      search_string)
+            if mobile_friendly.lower() == "mf":
+                await ctx.send(embed=search_embed.get_mobile_friendly_embed())
+                return
+            await ctx.send(embed=search_embed.get_embed())
+        except Exception as error:
+            await self.bot.cogs['Exception Logging'].log_exception(error, traceback.format_exc())
+            await ctx.message.reply(f"I couldn't find any results found for {search_string}. Please check your spelling and try again. 🫂")
 
     @commands.Cog.listener()
     async def on_message(self, message):

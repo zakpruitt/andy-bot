@@ -5,6 +5,7 @@ import os
 import re
 from itertools import zip_longest
 
+import numpy as np
 import pandas as pd
 
 from apis.blizzard_api import BlizzApi
@@ -115,6 +116,7 @@ class DroptimizerService:
                 dataframe = dataframe[dataframe['Item'].str.contains(search_string, case=False)]
             else:
                 dataframe = dataframe[dataframe['Boss'].str.contains(search_string, case=False)]
+            dataframe = dataframe.applymap(lambda x: np.nan if isinstance(x, (int, float)) and x < 0 else x)
             dataframe.dropna(how='all', axis='columns', inplace=True)
 
             # set index and drop unneeded columns

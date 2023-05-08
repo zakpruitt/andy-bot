@@ -1,3 +1,6 @@
+import json
+import os
+
 import discord
 from table2ascii import table2ascii as t2a, PresetStyle, Alignment
 
@@ -18,9 +21,10 @@ class DroptimizerSearchEmbed(AbstractEmbed):
         # get description as list of lists
         description = []
         headers = ["Name", "DPS Gain", "Item Name"]
-        for index, row in self.dataframe.iterrows():
+        for character_name, row in self.dataframe.iterrows():
             item_name = row["Item"]
-            description.append([index, "{:.1f}".format(row["Max Value"]), item_name[0:15]])
+            character_abbrv = GeneralUtility.get_spec_abbreviation(character_name)
+            description.append([character_abbrv, "{:.1f}".format(row["Max Value"]), item_name[0:15]])
 
         # return ascii table
         return t2a(
