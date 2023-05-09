@@ -1,7 +1,9 @@
 import os
 import traceback
 
+import discord
 from discord.ext import commands
+from discord import app_commands
 
 from modules.services.droptimizer_service import DroptimizerService
 from modules.utilities.google_sheets_utility import GoogleSheetsUtility
@@ -14,45 +16,48 @@ class DroptimizerCog(commands.Cog, name="Droptimizer"):
         self.DROPTIMIZER_CHANNEL_ID = int(os.getenv("DEV_DROPTIMIZER_CHANNEL_ID"))
         self.sheets_util = GoogleSheetsUtility(os.getenv('DROPTIMIZER_SPREADSHEET_NAME'))
 
-    @commands.command(name="droprun")
-    async def run_droptimizer_reports(self, ctx: commands.Context):
-        """ Parses all input droptimizer links. """
+    @app_commands.command(name="droptimizer_run", description="Parses all input droptimizer links.")
+    async def run_droptimizer_reports(self, interaction: discord.Interaction):
         try:
-            # make this into a specific embed
             progress_embed = DroptimizerService.get_progress_embed()
-            progress_msg = await ctx.send(embed=progress_embed.get_embed())
+            progress_msg = await interaction.channel.send(embed=progress_embed.get_embed())
+            await interaction.response.send_message('Droptimizer report processing started!',
+                                                    ephemeral=True)
             await DroptimizerService.process_droptimizer_reports(progress_embed, progress_msg)
         except Exception as error:
             await self.bot.cogs['Exception Logging'].log_exception(error, traceback.format_exc())
-            await progress_msg.edit(embed=progress_embed.error())
+            await progress_msg.edit(embed=progress_embed.error(), delete_after=30)
 
-    @commands.command('dropsearch')
-    async def search_droptimizer_data(self, ctx: commands.Context, difficulty: str, search_type: str,
-                                      search_string: str, mobile_friendly: str = ""):
-        """ Gives a list of the highest upgrades per item or boss. """
+    @app_commands.command(name='droptimizer_query', description='Queries droptimizer data and displays it in an embed.')
+    async def search_droptimizer_data(self, interaction: discord.Interaction, difficulty: str, boss_or_item: str,
+                                      query: str, mobile_friendly: str = ""):
+        # Defer the response
+        await interaction.response.defer()
+
         # Check parameters for validity
         if difficulty.lower() not in ['mythic', 'heroic', 'normal']:
-            await ctx.channel.send('Invalid difficulty. Valid options: Mythic, Heroic, and Normal')
+            await interaction.response.send_message('Invalid difficulty. Valid options: Mythic, Heroic, and Normal')
             return
-        if search_type.lower() not in ['boss', 'item']:
-            await ctx.channel.send('Invalid type. Valid options: Boss, Item')
+        if boss_or_item.lower() not in ['boss', 'item']:
+            await interaction.response.send_message('Invalid type. Valid options: Boss, Item')
             return
 
         try:
             # get embed and send it
-            search_embed = DroptimizerService.search_droptimizer_data(difficulty.capitalize(),
-                                                                      search_type.lower(),
-                                                                      search_string)
+            search_embed = DroptimizerService.search_droptimizer_data(difficulty.capitalize(), boss_or_item.lower(),
+                                                                      query)
             if mobile_friendly.lower() == "mf":
-                await ctx.send(embed=search_embed.get_mobile_friendly_embed())
+                await interaction.response.send_message(embed=search_embed.get_mobile_friendly_embed())
                 return
-            await ctx.send(embed=search_embed.get_embed())
+            await interaction.response.send_message(embed=search_embed.get_embed())
         except Exception as error:
             await self.bot.cogs['Exception Logging'].log_exception(error, traceback.format_exc())
-            await ctx.message.reply(f"I couldn't find any results found for {search_string}. Please check your spelling and try again. 🫂")
+            await interaction.response.send_message(
+                f"I couldn't find any results found for {query}. Please check your query and try again. 🫂"
+            )
 
     @commands.Cog.listener()
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message):
         """ Listens for droptimizer links and appends them to the spreadsheet. """
         if message.channel.id != self.DROPTIMIZER_CHANNEL_ID:
             return
@@ -62,13 +67,16 @@ class DroptimizerCog(commands.Cog, name="Droptimizer"):
             if 'https://www.raidbots.com/simbot/report' in message.content:
                 links_processed = await DroptimizerService.add_droptimizer_report(message.content)
                 await message.delete()
-                await message.channel.send(f"I successfully processed {links_processed} link(s). Thank you, {mention}! <:tier5:1085390493778710683>")
+                await message.channel.send(
+                    f"I successfully processed {links_processed} link(s). Thank you, {mention}! <:tier5:1085390493778710683>",
+                    delete_after=10800)
         except Exception as error:
             await self.bot.cogs['Exception Logging'].log_exception(error, traceback.format_exc())
             await message.reply(f"There was an error processing your droptimizer report(s), {mention}. "
-                                       f"<:TrollDespair:1081251201951223819>\n\nPlease verify your link(s) are correct"
-                                       f"! If your link(s) are valid and issues persist, please ping an "         
-                                       f"officer. <:Okayge:1103488695174189177> 👍")
+                                f"<:TrollDespair:1081251201951223819>\n\nPlease verify your link(s) are correct"
+                                f"! If your link(s) are valid and issues persist, please ping an "
+                                f"officer. <:Okayge:1103488695174189177> 👍",
+                                delete_after=10800)
 
 
 async def setup(bot: commands.Bot):

@@ -21,4 +21,4 @@ class RaiderIoService:
                                     raider_profile.thumbnail_url,
                                     raider_profile.profile_url,
                                     mythic_plus_scores_by_season,
-                                    raider_profile.last_crawled_at).get_embed()
+                                    raider_profile.last_crawled_at)
