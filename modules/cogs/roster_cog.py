@@ -1,8 +1,5 @@
-import os
-
 from discord.ext import commands
 
-from modules.services.recruit_service import RecruitService
 from modules.services.roster_service import RosterService
 
 

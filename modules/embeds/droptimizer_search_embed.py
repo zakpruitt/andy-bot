@@ -1,6 +1,3 @@
-import json
-import os
-
 import discord
 from table2ascii import table2ascii as t2a, PresetStyle, Alignment
 
@@ -18,21 +15,30 @@ class DroptimizerSearchEmbed(AbstractEmbed):
         self.color = 0x27c6f2
 
     def get_description(self):
-        # get description as list of lists
         description = []
-        headers = ["Name", "DPS Gain", "Item Name"]
-        for character_name, row in self.dataframe.iterrows():
-            item_name = row["Item"]
-            character_abbrv = GeneralUtility.get_spec_abbreviation(character_name)
-            description.append([character_abbrv, "{:.1f}".format(row["Max Value"]), item_name[0:15]])
-
-        # return ascii table
-        return t2a(
-            header=headers,
-            body=description,
-            style=PresetStyle.ascii_borderless,
-            alignments=[Alignment.LEFT, Alignment.DECIMAL, Alignment.CENTER]
-        )
+        if self.search_type.lower() == "boss":
+            headers = ["Name", "DPS Gain", "Item Name"]
+            for character_name, row in self.dataframe.iterrows():
+                item_name = row["Item"]
+                character_abbrv = GeneralUtility.get_spec_abbreviation(character_name)
+                description.append([character_abbrv, "{:.1f}".format(row["Max Value"]), item_name[0:15]])
+            return t2a(
+                header=headers,
+                body=description,
+                style=PresetStyle.ascii_borderless,
+                alignments=[Alignment.LEFT, Alignment.DECIMAL, Alignment.CENTER]
+            )
+        elif self.search_type.lower() == "item":
+            headers = ["Name", "DPS Gain"]
+            for character_name, row in self.dataframe.iterrows():
+                character_abbrv = GeneralUtility.get_spec_abbreviation(character_name)
+                description.append([character_abbrv, "{:.1f}".format(row["Max Value"])])
+            return t2a(
+                header=headers,
+                body=description,
+                style=PresetStyle.ascii_borderless,
+                alignments=[Alignment.LEFT, Alignment.DECIMAL]
+            )
 
     def get_mobile_friendly_description(self):
         description = []

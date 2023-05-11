@@ -91,5 +91,3 @@ class RosterService:
 
         print("Roster:", roster_with_upgrades)
         print("Bench:", bench_with_upgrades)
-
-

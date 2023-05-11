@@ -1,8 +1,8 @@
 import os
 
 import discord
-from discord.ext import commands
 from discord import app_commands
+from discord.ext import commands
 
 from modules.services.recruit_service import RecruitService
 
@@ -22,7 +22,8 @@ class RecruitCog(commands.Cog, name="Recruit"):
 
     @app_commands.command(name="trial_applicant", description="Spawns a trial channel and adds all required members "
                                                               "to the channel.")
-    async def trial_applicant(self, interaction: discord.Interaction, recruit_name: str = None, discord_name: str = None):
+    async def trial_applicant(self, interaction: discord.Interaction, recruit_name: str = None,
+                              discord_name: str = None):
         if interaction.channel.parent_id != self.RECRUIT_FORUM_ID:
             return
         await RecruitService.generate_trial_channel(interaction, recruit_name, discord_name)

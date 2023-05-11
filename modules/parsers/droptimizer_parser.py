@@ -33,13 +33,17 @@ class DroptimizerParser:
     def parse_reports(raider_links):
         parsed_reports = {difficulty: {} for difficulty in ["Mythic", "Heroic", "Normal"]}
 
-        for raider, links in raider_links.items():
-            for difficulty in ["Mythic", "Heroic", "Normal"]:
-                link = links.get(difficulty)
-                if link is not None:
-                    report_data = RaidbotsUtility.get_report_csv(link)
-                    if report_data is None:
-                        raise Exception("Report link is invalid! Report link violated: " + link + ".")
-                    parsed_reports[difficulty][raider] = DroptimizerParser.parse_report(report_data)
+        try:
+            for raider, links in raider_links.items():
+                for difficulty in ["Mythic", "Heroic", "Normal"]:
+                    link = links.get(difficulty)
+                    if link is not None:
+                        report_data = RaidbotsUtility.get_report_csv(link)
+                        if report_data is None:
+                            raise Exception("Report link is invalid! Report link violated: " + link + ".")
+                        parsed_reports[difficulty][raider] = DroptimizerParser.parse_report(report_data)
+        except Exception as e:
+            print(e)
+            return None
 
         return parsed_reports["Mythic"], parsed_reports["Heroic"], parsed_reports["Normal"]

@@ -151,7 +151,7 @@ class DroptimizerService:
             icon_url = BlizzApi.get_icon_from_boss_name(icon_name)
 
         return DroptimizerSearchEmbed(
-            title=f'Droptimizer Search - {icon_name}',
+            title=icon_name,
             icon_url=icon_url,
             dataframe=result_df,
             search_type=search_type

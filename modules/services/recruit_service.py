@@ -42,7 +42,8 @@ class RecruitService:
             recruit_member: discord.PermissionOverwrite(read_messages=True, send_messages=True),
         }
         channel_name = f"trial-{recruit_name}"
-        new_channel = await interaction.guild.create_text_channel(channel_name, category=category, overwrites=overwrites)
+        new_channel = await interaction.guild.create_text_channel(channel_name, category=category,
+                                                                  overwrites=overwrites)
 
         # Populate the trial channel and permit roles
         await new_channel.send(f"Hey, {recruit_member.mention}!! 👋 Welcome to your own, personal trial channel. "
