@@ -30,4 +30,6 @@ class WinLossLeaderboardService:
 
     @staticmethod
     def get_w_l_leaderboard():
-        return WinLossLeaderboardEmbed("W/L Leaderboard")
+        with open(os.getenv("BOT_PATH") + 'resources/w_l_count.json', 'r') as f:
+            current_w_l_count = json.load(f)
+        return WinLossLeaderboardEmbed("W/L Leaderboard", current_w_l_count)
