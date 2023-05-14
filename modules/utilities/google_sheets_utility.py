@@ -1,3 +1,5 @@
+import os
+
 import gspread
 import gspread_dataframe as gs_df
 
@@ -5,7 +7,7 @@ import gspread_dataframe as gs_df
 class GoogleSheetsUtility:
 
     def __init__(self, spreadsheet_name: str):
-        self.gc = gspread.service_account(filename='resources/creds.json')
+        self.gc = gspread.service_account(filename=os.getenv("BOT_PATH") + 'resources/creds.json')
         self.spreadsheet = self.gc.open(spreadsheet_name)
         for worksheet in self.spreadsheet.worksheets():
             setattr(self, worksheet.title, worksheet)
