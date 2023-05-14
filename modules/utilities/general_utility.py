@@ -1,5 +1,6 @@
 import datetime
 import json
+import os
 import time
 
 
@@ -14,7 +15,7 @@ class GeneralUtility:
 
     @staticmethod
     def get_spec_abbreviation(character_spec):
-        with open('resources/spec_abbrv_map.json', 'r') as spec_abbrv_map:
+        with open(os.getenv("BOT_PATH") + 'resources/spec_abbrv_map.json', 'r') as spec_abbrv_map:
             name, spec = character_spec.split(" - ")
             abbreviation = json.load(spec_abbrv_map)[spec.lower()]
             return f"{name} - {abbreviation}"
