@@ -17,6 +17,10 @@ class DiscordUtility:
 
     @staticmethod
     def get_member_by_discord_name(guild, member_name):
-        return discord.utils.get(guild.members,
-                                 name=member_name.split("#")[0],
-                                 discriminator=member_name.split("#")[1])
+        if "#" in member_name:
+            return discord.utils.get(guild.members,
+                                     name=member_name.split("#")[0],
+                                     discriminator=member_name.split("#")[1])
+        else:
+            return discord.utils.get(guild.members,
+                                     name=member_name)
