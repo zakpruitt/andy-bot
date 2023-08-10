@@ -26,7 +26,8 @@ class RecruitCog(commands.Cog, name="Recruit"):
                               discord_name: str = None):
         if interaction.channel.parent_id != self.RECRUIT_FORUM_ID:
             return
-        await RecruitService.generate_trial_channel(interaction, recruit_name, discord_name)
+        trial_channel = await RecruitService.generate_trial_channel(interaction, recruit_name, discord_name)
+        await interaction.response.send_message(f"Created a new channel {trial_channel.mention}.")
 
     @commands.Cog.listener()
     async def on_thread_create(self, thread):
