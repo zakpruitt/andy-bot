@@ -3,7 +3,7 @@ import traceback
 
 import discord
 from discord import app_commands
-from discord.app_commands import MissingAnyRole
+from discord.app_commands.errors import MissingAnyRole
 from discord.ext import commands
 
 from modules.services.droptimizer_service import DroptimizerService
@@ -18,7 +18,7 @@ class DroptimizerCog(commands.Cog, name="Droptimizer"):
         self.sheets_util = GoogleSheetsUtility(os.getenv('DROPTIMIZER_SPREADSHEET_NAME'))
 
     @app_commands.command(name="droptimizer_run", description="Parses all input droptimizer links.")
-    @commands.has_any_role('Officer', 'Recruiter')
+    @app_commands.checks.has_any_role('Officer', 'Recruiter')
     async def run_droptimizer_reports(self, interaction: discord.Interaction):
         try:
             progress_embed = DroptimizerService.get_progress_embed()
@@ -26,14 +26,12 @@ class DroptimizerCog(commands.Cog, name="Droptimizer"):
             await interaction.response.send_message('Droptimizer report processing started!',
                                                     ephemeral=True)
             await DroptimizerService.process_droptimizer_reports(progress_embed, progress_msg)
-        except MissingAnyRole as error:
-            await self.bot.cogs['Exception Logging'].log_exception(error, traceback.format_exc())
         except Exception as error:
             await self.bot.cogs['Exception Logging'].log_exception(error, traceback.format_exc())
             await progress_msg.edit(embed=progress_embed.error(), delete_after=30)
 
     @app_commands.command(name='droptimizer_query', description='Queries droptimizer data and displays it in an embed.')
-    @commands.has_any_role('Officer', 'Recruiter')
+    @app_commands.checks.has_any_role('Officer', 'Recruiter')
     async def search_droptimizer_data(self, interaction: discord.Interaction, difficulty: str, boss_or_item: str,
                                       query: str, mobile_friendly: str = ""):
         # Defer the response
@@ -41,24 +39,23 @@ class DroptimizerCog(commands.Cog, name="Droptimizer"):
 
         # Check parameters for validity
         if difficulty.lower() not in ['mythic', 'heroic', 'normal']:
-            await interaction.response.send_message('Invalid difficulty. Valid options: Mythic, Heroic, and Normal',
-                                                    ephemeral=True)
+            await interaction.followup.send('Invalid difficulty. Valid options: Mythic, Heroic, and Normal',
+                                            ephemeral=True)
             return
         if boss_or_item.lower() not in ['boss', 'item']:
-            await interaction.response.send_message('Invalid type. Valid options: Boss, Item',
-                                                    ephemeral=True)
+            await interaction.followup.send('Invalid type. Valid options: Boss, Item',
+                                            ephemeral=True)
             return
 
         searching_message = await interaction.followup.send('Searching...', ephemeral=True)
         try:
-            search_embed = DroptimizerService.search_droptimizer_data(difficulty.capitalize(), boss_or_item.lower(),
+            search_embed = DroptimizerService.search_droptimizer_data(difficulty.capitalize(),
+                                                                      boss_or_item.lower(),
                                                                       query)
             if mobile_friendly.lower() == "mf":
                 await searching_message.edit(content='', embed=search_embed.get_mobile_friendly_embed())
             else:
                 await searching_message.edit(content='', embed=search_embed.get_embed())
-        except MissingAnyRole as error:
-            await self.bot.cogs['Exception Logging'].log_exception(error, traceback.format_exc())
         except Exception as error:
             await self.bot.cogs['Exception Logging'].log_exception(error, traceback.format_exc())
             await searching_message.delete()
@@ -68,7 +65,7 @@ class DroptimizerCog(commands.Cog, name="Droptimizer"):
 
     @app_commands.command(name='droptimizer_catchup',
                           description='Retrieves links in the instance the bot was offline.')
-    @commands.has_any_role('Officer', 'Recruiter')
+    @app_commands.checks.has_any_role('Officer', 'Recruiter')
     async def catchup_droptimizer_links(self, interaction: discord.Interaction):
         if interaction.channel.id != self.DROPTIMIZER_CHANNEL_ID:
             return
@@ -83,8 +80,6 @@ class DroptimizerCog(commands.Cog, name="Droptimizer"):
                 await self.on_message(message)
             interaction.followup.send(f"All reports caught up! <:tier5:1085390493778710683>",
                                       ephemeral=True)
-        except MissingAnyRole as error:
-            await self.bot.cogs['Exception Logging'].log_exception(error, traceback.format_exc())
         except Exception as error:
             await self.bot.cogs['Exception Logging'].log_exception(error, traceback.format_exc())
             await interaction.followup.send(
