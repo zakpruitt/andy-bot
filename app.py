@@ -6,6 +6,7 @@ import time
 
 import discord
 from colorama import Back, Fore, Style
+from discord.app_commands import MissingAnyRole
 from discord.ext import commands
 from dotenv import load_dotenv
 
@@ -17,10 +18,19 @@ client = commands.Bot(command_prefix=commands.when_mentioned_or("!aa "), intents
 
 
 async def load_extensions():
-    for file in os.listdir(os.getenv("BOT_PATH") + "modules/cogs"):
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    cogs_dir = os.path.join(base_dir, "modules", "cogs")
+
+    for file in os.listdir(cogs_dir):
         if file.startswith("__pycache__"):
             continue
         await client.load_extension(f"modules.cogs.{file[:-3]}")
+
+
+@client.event
+async def on_app_command_error(interaction, error):
+    if isinstance(error, MissingAnyRole):
+        await interaction.followup.send("You do not have permission to run this command.")
 
 
 @client.event
