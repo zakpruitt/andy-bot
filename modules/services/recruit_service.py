@@ -8,10 +8,10 @@ class RecruitService:
 
     @staticmethod
     async def close_application(interaction):
-        await interaction.channel.edit(name=f"[Closed] {interaction.channel.name}", archived=True, locked=True)
         time, date = GeneralUtility.get_time_and_date()
         await interaction.response.send_message(
             f'Thread {interaction.channel.mention} was closed and locked on {date} at {time}.')
+        await interaction.channel.edit(name=f"[Closed] {interaction.channel.name}", archived=True, locked=True)
 
     @classmethod
     async def generate_trial_channel(cls, interaction, recruit_name=None, discord_name=None):
@@ -36,39 +36,39 @@ class RecruitService:
         # Create a new channel under the category
         overwrites = {
             interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False),
-            recruiter_role: discord.PermissionOverwrite(read_messages=True, send_messages=True),
+            recruiter_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, manage_channels=True),
             bot_role: discord.PermissionOverwrite(read_messages=True, send_messages=True),
             officer_role: discord.PermissionOverwrite(read_messages=True, send_messages=True),
             recruit_member: discord.PermissionOverwrite(read_messages=True, send_messages=True),
         }
         channel_name = f"trial-{recruit_name}"
-        new_channel = await interaction.guild.create_text_channel(channel_name, category=category,
-                                                                  overwrites=overwrites)
+        trial_channel = await interaction.guild.create_text_channel(channel_name,
+                                                                    category=category,
+                                                                    overwrites=overwrites)
 
         # Populate the trial channel and permit roles
-        await new_channel.send(f"Hey, {recruit_member.mention}!! 👋 Welcome to your own, personal trial channel. "
+        await trial_channel.send(f"Hey, {recruit_member.mention}!! 👋 Welcome to your own, personal trial channel. "
                                f"<:BatChest:1082112942541123716>\n\nThis channel is meant to be a private and direct "
                                f"line of communication between yourself and the officers. This may include log "
                                f"reviews, log analysis, conversation about strategies, etc. Expect feedback at least "
                                f"once a week, typically between Thursday - Monday. "
                                f"<:BASED:1079179696765411414>\n\nFeel free to ping ANY officer. We are here to help "
-                               f"you succeed! Specifically, ping <@305491314286526474> for performance or healing "
-                               f"related needs/questions, <@124689347818684419> for any strategy/composition related "
-                               f"needs/questions, and <@64833312220250112> for anything else! <a:pepeJAM:1081251169906724864>"
-                               f"\n\nWe "
-                               f"provide six versatility phials, pot cauldrons, feasts, repairs (during raid), "
+                               f"you succeed! Specifically, ping <@192438478112423936> for performance "
+                               f"related needs/questions, ping <@90782377458044928> for healing related "
+                               f"needs/questions, <@124689347818684419> for any strategy/composition related"
+                               f"needs/questions, and <@64833312220250112> for anything else! "
+                               f"<a:pepeJAM:1081251169906724864>"
+                               f"\n\nWe provide six versatility phials, pot cauldrons, feasts, repairs (during raid), "
                                f"and vantus runes. It is expected you bring any other ancillary consumables ("
                                f"inscription runes, etc.) and are FULLY enchanted (this includes tertiaries). "
                                f"Required addons outside of the typical ones are MRT (Method Raid Tools) and RC Loot "
-                               f"Council. As a reminder, we raid M, T, TH 10 PM - 1 AM CST. It is expected raiders "
-                               f"are present at least by 9:50 PM. <a:LETSGOOO:1081251215796604979>\n\nTrials can "
-                               f"participate in boosts starting from day 1, so feel free to sign up in "
-                               f"<#1092128300563964046>! Other than that, please keep an eye on "
-                               f"<#1079191097743519835> for roster postings and have fun!! "
+                               f"Council. We HIGHLY recommend you download Twitch Emotes v2! As a reminder, we raid "
+                               f"M, T, TH 10 PM - 1 AM CST. It is expected raiders"
+                               f" are present at least by 9:50 PM. <a:LETSGOOO:1081251215796604979>\n\nPlease keep an "
+                               f"eye on <#1079191097743519835> for roster postings and have fun!! "
                                f"<:GAmer:1081034983558348800> <a:HYPERCLAP:1081251217147187252>")
         await recruit_member.add_roles(recruit_trial_role)
-        await interaction.send(f"Created a new channel {new_channel.mention} under the category {category.name}.")
-        await interaction.send(f"Given the role {recruit_trial_role.mention} to {recruit_member.mention}.")
+        return trial_channel
 
     @staticmethod
     async def __get_recruit_embed(channel):
